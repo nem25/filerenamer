@@ -1,5 +1,7 @@
 **Authors's note**: This project is completely generated using [Llamacoder](https://llamacoder.together.ai/) to create a preliminary codebase and then ChatGPT to grow it out. I am a coder but I don't know ReactJS or Typscript or Electron or etc. I wanted to explore how far I can build a project completely using gen AI. My journey is outlined at the [end](#my-experience-with-genai).
 
+As this is all AI generated, please pardon any errors and other issues. If you find any, please do mark them so I can improve on it.
+
 # File Renamer
 
 ## Overview
@@ -89,3 +91,6 @@ and building this project...
 - I got ChatGPT to modularise the code rather than having everything in one file. It was a really good experience because every time a property changed in one file, it automatically informed me the other files dependent on that property and how I should change it.
 - We even modularised further making common components for the HTML elements.
 - A little more beautification was done by me uploading screenshots of the app to ChatGPT and marking areas that were problematic, like the input field was too close to a button. It accurately identified them by just looking at the screenshot.
+
+## 9 August 2024
+- After the last few days of discussion where it would output the whole `FileRenamer.tsx` file every time I requested a change, it now on its own has started to share only the functions that need to be updated.

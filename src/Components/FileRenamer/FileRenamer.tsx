@@ -26,8 +26,24 @@ const FileRenamer: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [message, setMessage] = useState<string>('');
 
+  const cleanUpFileName = (fileName: string): string => {
+    const strippedName = fileName.replace(/\.[^/.]+$/, "");
+    const regex = /^(.*?)(?:\.(\d{4})).*$/i;
+    const match = strippedName.match(regex);
+
+    if (match) {
+      const title = match[1].replace(/\./g, ' ');
+      const year = match[2];
+      return `${title} ${year}`.trim();
+    }
+
+    return strippedName.replace(/\./g, ' ');
+  };
+
   const handleAddFile = (file: CustomFile) => {
-    setFiles([...files, file]);
+    const cleanedFileName = cleanUpFileName(file.name);
+    setFiles([...files, { ...file, name: cleanedFileName }]);
+    setSearchResults({}); // Clear search results when a new file is added
   };
 
   const handleUpdateFileName = (index: number, newName: string) => {
@@ -36,6 +52,11 @@ const FileRenamer: React.FC = () => {
 
   const handleRemoveFile = (index: number) => {
     setFiles(files.filter((_, i) => i !== index));
+    setSearchResults(prevResults => {
+      const updatedResults = { ...prevResults };
+      delete updatedResults[index]; // Remove the corresponding search results
+      return updatedResults;
+    });
   };
 
   const stripFileExtension = (fileName: string): string => {
@@ -47,40 +68,71 @@ const FileRenamer: React.FC = () => {
     if (!file.name) return;
 
     const strippedFileName = stripFileExtension(file.name);
+    const regex = /^(.*?)(\d{4})$/i;
+    const match = strippedFileName.match(regex);
+
+    let title = strippedFileName;
+    let year = "";
+
+    if (match) {
+        title = match[1].trim();
+        year = match[2];
+    }
+
     setLoadingIndex(index);
 
     try {
-      const response = await axios.get(`https://api.themoviedb.org/3/search/multi?api_key=${process.env.REACT_APP_TMDB_API_KEY}&query=${strippedFileName}`);
-      const results = response.data.results;
+        let results: any[] = [];
 
-      if (results.length > 0) {
-        const filteredResults = results
-          .filter((result: any) => result.media_type === 'movie' || result.media_type === 'tv')
-          .map((result: any) => ({
-            title: result.title || result.name,
-            release_date: result.release_date || result.first_air_date,
-            media_type: result.media_type
-          }))
-          .sort((a: SearchResult, b: SearchResult) => (b.release_date > a.release_date ? 1 : -1));
+        // Search in both movies and TV shows
+        const [movieResponse, tvResponse] = await Promise.all([
+            axios.get(`https://api.themoviedb.org/3/search/movie`, {
+                params: {
+                    api_key: process.env.REACT_APP_TMDB_API_KEY,
+                    query: title,
+                    year: year || undefined, // If year is available, add it
+                },
+            }),
+            axios.get(`https://api.themoviedb.org/3/search/tv`, {
+                params: {
+                    api_key: process.env.REACT_APP_TMDB_API_KEY,
+                    query: title,
+                    first_air_date_year: year || undefined, // If year is available, add it
+                },
+            }),
+        ]);
 
-        if (filteredResults.length > 0) {
-          setSearchResults(prevResults => ({ ...prevResults, [index]: filteredResults }));
+        // Combine results from both searches
+        results = [...movieResponse.data.results, ...tvResponse.data.results];
+
+        if (results.length > 0) {
+            const filteredResults = results
+                .map((result: any) => ({
+                    title: result.title || result.name,
+                    release_date: result.release_date || result.first_air_date,
+                    media_type: result.media_type || (result.first_air_date ? 'tv' : 'movie'),
+                }))
+                .sort((a: SearchResult, b: SearchResult) => (b.release_date > a.release_date ? 1 : -1));
+
+            if (filteredResults.length > 0) {
+                setSearchResults(prevResults => ({ ...prevResults, [index]: filteredResults }));
+            } else {
+                setError(`No relevant match found for ${file.name}`);
+            }
         } else {
-          setError(`No relevant match found for ${file.name}`);
+            setError(`No match found for ${file.name}`);
         }
-      } else {
-        setError(`No match found for ${file.name}`);
-      }
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('An unknown error occurred');
-      }
+        if (err instanceof Error) {
+            setError(err.message);
+        } else {
+            setError('An unknown error occurred');
+        }
     } finally {
-      setLoadingIndex(null);
+        setLoadingIndex(null);
     }
-  };
+};
+
 
   const handleRenameFile = (index: number, newName: string) => {
     const file = files[index];
@@ -91,6 +143,11 @@ const FileRenamer: React.FC = () => {
     if (confirmRename) {
       window.electron.renameFile(file.path, fullName);
       setFiles(files.filter((_, i) => i !== index));
+      setSearchResults(prevResults => {
+        const updatedResults = { ...prevResults };
+        delete updatedResults[index]; // Remove the corresponding search results
+        return updatedResults;
+      });
     }
   };
 
