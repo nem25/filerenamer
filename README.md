@@ -1,4 +1,4 @@
-Sure! Here's a sample `README.md` file for your project:
+Authors's note: This file is completely generated using [Llamacoder](https://llamacoder.together.ai/) to create a preliminary codebase and then ChatGPT to grow it out. I am a coder but I don't know ReactJS or Typscript or Electron or etc. I wanted to explore how far I can build a project completely using gen AI. I will post my experience here.
 
 ### `README.md`
 
