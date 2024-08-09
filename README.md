@@ -1,6 +1,4 @@
-Authors's note: This file is completely generated using [Llamacoder](https://llamacoder.together.ai/) to create a preliminary codebase and then ChatGPT to grow it out. I am a coder but I don't know ReactJS or Typscript or Electron or etc. I wanted to explore how far I can build a project completely using gen AI. I will post my experience here.
-
-### `README.md`
+**Authors's note**: This project is completely generated using [Llamacoder](https://llamacoder.together.ai/) to create a preliminary codebase and then ChatGPT to grow it out. I am a coder but I don't know ReactJS or Typscript or Electron or etc. I wanted to explore how far I can build a project completely using gen AI. My journey is outlined at the [end](#my-experience-with-genai).
 
 # File Renamer
 
@@ -77,3 +75,17 @@ Contributions are welcome! Please open an issue or submit a pull request for any
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+# My Experience with GenAI
+and building this project...
+
+## 7 August 2024
+- I created a basic filerename app using Llamacoder. I had to run it locally on my machine because Llamacoder didn't allow external libraries like `axios` to run.
+- When I ran it locally, it gave errors on the colour names in the CSS. After asking ChatGPT, it correctly identified missing import of Tailwind CSS.
+- It did not actually rename the files but it was able to easily access the TMDB API and change any filenames I put in.
+- To change filenames on the local machine, it suggested I use Electron.
+
+## 8 August 2024
+- I got ChatGPT to modularise the code rather than having everything in one file. It was a really good experience because every time a property changed in one file, it automatically informed me the other files dependent on that property and how I should change it.
+- We even modularised further making common components for the HTML elements.
+- A little more beautification was done by me uploading screenshots of the app to ChatGPT and marking areas that were problematic, like the input field was too close to a button. It accurately identified them by just looking at the screenshot.
