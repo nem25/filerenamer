@@ -94,3 +94,9 @@ and building this project...
 
 ## 9 August 2024
 - After the last few days of discussion where it would output the whole `FileRenamer.tsx` file every time I requested a change, it now on its own has started to share only the functions that need to be updated.
+
+## 14 August 2024
+- I had quite a break since I looked at this project and I forgot what I was doing, where I was at. I simply asked ChatGPT where were we? And it gave me the full low down.
+- When I asked to create a dialog box for error messages, it suggested we create a common modal we can use with any dialog box.
+- It asked me to remove a handler and I challenged it and it explained very nicely why I don't need it anymore but also gave the alternative of keeping it and how I could potentially use it in the future.
+- It forgot we had one of the common components.

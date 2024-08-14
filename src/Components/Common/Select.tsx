@@ -12,11 +12,11 @@ const Select: React.FC<SelectProps> = ({ options, onChange, placeholder, value }
   <select
     value={value}
     onChange={onChange}
-    className={`${theme.colors.border} ${theme.colors.bgLight} ${theme.padding.md} ${theme.borderRadius} ${theme.colors.inputText} border p-2 rounded`}
+    className={`${theme.colors.border} ${theme.colors.bgLight} ${theme.padding.md} ${theme.borderRadius} ${theme.colors.inputText} border p-2 rounded max-w-full truncate`}
   >
     <option value="">{placeholder || 'Select an option'}</option>
     {options.map((option, index) => (
-      <option key={index} value={option.value}>
+      <option key={index} value={option.value} className="truncate">
         {option.label}
       </option>
     ))}

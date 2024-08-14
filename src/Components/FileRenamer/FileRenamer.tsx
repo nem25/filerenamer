@@ -3,8 +3,6 @@ import axios from 'axios';
 import FileInput from './FileInput';
 import FileList from './FileList';
 import RenameFileHandler from './RenameFileHandler';
-import ErrorMessage from '../Common/ErrorMessage';
-import SuccessMessage from '../Common/SuccessMessage';
 
 export interface CustomFile {
   name: string;
@@ -23,8 +21,6 @@ const FileRenamer: React.FC = () => {
   const [files, setFiles] = useState<CustomFile[]>([]);
   const [loadingIndex, setLoadingIndex] = useState<number | null>(null);
   const [searchResults, setSearchResults] = useState<{ [key: number]: SearchResult[] }>({});
-  const [error, setError] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
 
   const cleanUpFileName = (fileName: string): string => {
     const strippedName = fileName.replace(/\.[^/.]+$/, "");
@@ -43,7 +39,7 @@ const FileRenamer: React.FC = () => {
   const handleAddFile = (file: CustomFile) => {
     const cleanedFileName = cleanUpFileName(file.name);
     setFiles([...files, { ...file, name: cleanedFileName }]);
-    setSearchResults({}); // Clear search results when a new file is added
+    setSearchResults({});
   };
 
   const handleUpdateFileName = (index: number, newName: string) => {
@@ -54,7 +50,7 @@ const FileRenamer: React.FC = () => {
     setFiles(files.filter((_, i) => i !== index));
     setSearchResults(prevResults => {
       const updatedResults = { ...prevResults };
-      delete updatedResults[index]; // Remove the corresponding search results
+      delete updatedResults[index];
       return updatedResults;
     });
   };
@@ -84,25 +80,23 @@ const FileRenamer: React.FC = () => {
     try {
         let results: any[] = [];
 
-        // Search in both movies and TV shows
         const [movieResponse, tvResponse] = await Promise.all([
             axios.get(`https://api.themoviedb.org/3/search/movie`, {
                 params: {
                     api_key: process.env.REACT_APP_TMDB_API_KEY,
                     query: title,
-                    year: year || undefined, // If year is available, add it
+                    year: year || undefined,
                 },
             }),
             axios.get(`https://api.themoviedb.org/3/search/tv`, {
                 params: {
                     api_key: process.env.REACT_APP_TMDB_API_KEY,
                     query: title,
-                    first_air_date_year: year || undefined, // If year is available, add it
+                    first_air_date_year: year || undefined,
                 },
             }),
         ]);
 
-        // Combine results from both searches
         results = [...movieResponse.data.results, ...tvResponse.data.results];
 
         if (results.length > 0) {
@@ -117,22 +111,21 @@ const FileRenamer: React.FC = () => {
             if (filteredResults.length > 0) {
                 setSearchResults(prevResults => ({ ...prevResults, [index]: filteredResults }));
             } else {
-                setError(`No relevant match found for ${file.name}`);
+                window.alert(`No relevant match found for ${file.name}`);
             }
         } else {
-            setError(`No match found for ${file.name}`);
+            window.alert(`No match found for ${file.name}`);
         }
     } catch (err) {
         if (err instanceof Error) {
-            setError(err.message);
+            window.alert(err.message);
         } else {
-            setError('An unknown error occurred');
+            window.alert('An unknown error occurred');
         }
     } finally {
         setLoadingIndex(null);
     }
-};
-
+  };
 
   const handleRenameFile = (index: number, newName: string) => {
     const file = files[index];
@@ -141,25 +134,21 @@ const FileRenamer: React.FC = () => {
     const fullName = `${newName}.${file.extension}`;
     const confirmRename = window.confirm(`Are you sure you want to rename "${file.name}" to "${fullName}"?`);
     if (confirmRename) {
-      window.electron.renameFile(file.path, fullName);
-      setFiles(files.filter((_, i) => i !== index));
-      setSearchResults(prevResults => {
-        const updatedResults = { ...prevResults };
-        delete updatedResults[index]; // Remove the corresponding search results
-        return updatedResults;
-      });
-    }
-  };
+        window.electron.renameFile(file.path, fullName);
+        setFiles(files.filter((_, i) => i !== index));
+        setSearchResults(prevResults => {
+            const updatedResults = { ...prevResults };
+            delete updatedResults[index];
+            return updatedResults;
+        });
 
-  const handleRenameFileResponse = (response: string) => {
-    setMessage(response);
+        window.alert(`File "${file.name}" renamed successfully to "${fullName}".`);
+    }
   };
 
   return (
     <div className="max-w-md mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">File Renamer</h1>
-      {error && <ErrorMessage message={error} />}
-      {message && <SuccessMessage message={message} />}
       <FileInput onFileAdd={handleAddFile} />
       <FileList
         files={files}
@@ -170,7 +159,6 @@ const FileRenamer: React.FC = () => {
         onUpdateFileName={handleUpdateFileName}
         onRemoveFile={handleRemoveFile}
       />
-      <RenameFileHandler onRenameFileResponse={handleRenameFileResponse} />
     </div>
   );
 };
